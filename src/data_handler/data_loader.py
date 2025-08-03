@@ -136,7 +136,7 @@ def get_dataloaders_for_training(
     -------
     Returns
     -------
-    (train_loader, validation_loader) : Tuple[DataLoader, DataLoader]
+    (train_loader, validation_loader): Tuple[DataLoader, DataLoader]
         a tuple of objects for training and validation dataset loaders
     """
     list_train_imgs, list_validation_imgs, list_train_lbls, list_validation_lbls = (
