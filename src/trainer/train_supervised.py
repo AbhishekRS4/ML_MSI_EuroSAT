@@ -319,7 +319,7 @@ def train_pipeline(
     best_validation_acc = 0
 
     logging.info(
-        f"Training the EuroSAT MSI classification model started, model_name: {model_name}, num_classe: {num_classes}"
+        f"Training the EuroSAT MSI classification model started, model_name: {model_name}, num_classes: {num_classes}"
     )
 
     best_validation_acc = 0
@@ -422,5 +422,5 @@ def train_pipeline(
                 )
 
             lr_scheduler.step()
-    logging.info("Training the Overhead MNIST image classification model complete!!!!")
+    logging.info("Training the EuroSAT MSI classification model complete!!!!")
     return
