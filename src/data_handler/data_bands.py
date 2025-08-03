@@ -23,7 +23,7 @@ def get_band_indices(list_bands: List[str]) -> List[int]:
     -------
     Returns
     -------
-    (band_indices): List[int]
+    band_indices: List[int]
         a list of data band indices
     """
     band_indices = []
