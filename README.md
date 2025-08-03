@@ -1,4 +1,4 @@
-# A Project with EuroSAT Multi-spectral imagery dataset
+# A repo with experiments on EuroSAT multi-spectral imagery dataset
 
 
 ## Experiments
