@@ -224,7 +224,7 @@ def train_pipeline(
         experiment name to be used in MLFlow
     model_name: str
         model name
-    list_filters: List[int] 
+    list_filters: List[int]
         list of filters to be used in the model(default: [64, 128, 256])
     dropout_ratio: float
         dropout ratio to be used in the dropout layer (default: 0.2)
@@ -371,10 +371,10 @@ def train_pipeline(
                 f"Epoch: {epoch}/{num_epochs}, time: {time_end-time_start:.4f} sec."
             )
             logging.info(
-                f"Train set, loss: {train_loss:.4f}, accuracy: {train_acc:.4f}, f1: {train_f1:.4f}, precision: {train_pre}, recall: {train_rec}"
+                f"Train set, loss: {train_loss:.4f}, accuracy: {train_acc:.4f}, f1: {train_f1:.4f}, precision: {train_pre:.4f}, recall: {train_rec:.4f}"
             )
             logging.info(
-                f"Validation set, loss: {validation_loss:.4f}, accuracy: {validation_acc:.4f}, f1: {validation_f1}, precision: {validation_pre}, recall: {validation_rec}\n"
+                f"Validation set, loss: {validation_loss:.4f}, accuracy: {validation_acc:.4f}, f1: {validation_f1:.4f}, precision: {validation_pre:.4f}, recall: {validation_rec:.4f}\n"
             )
 
             mlflow.log_metric("train_loss", train_loss, step=epoch)
