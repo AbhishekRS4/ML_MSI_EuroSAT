@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 import torch
@@ -18,8 +17,8 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from mlflow.models.signature import infer_signature
 
 from data_handler.file_utils import get_list_files_n_labels
-from data_handler.data_loader import get_dataloaders_for_training
-from models.msi_eurosat_net import MSIEuroSATResNet, MSIEuroSATResKANet
+from data_handler.supervised_data_loader import get_dataloaders_for_training
+from models.msi_supervised import MSIEuroSATResNet, MSIEuroSATResKANet
 from metrics.compute_metrics import compute_base_metrics, compute_additional_metrics
 
 
