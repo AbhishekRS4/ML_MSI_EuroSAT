@@ -84,7 +84,7 @@ def split_dataset(
     list_labels: List[int]
         a list of labels corresponding to train image files
     random_state: int
-        random state to be used for split (default: 4)
+        random state to be used for split (default: 29)
     validation_size: float
         size of validation set (default: 0.2)
 
@@ -131,7 +131,7 @@ def get_dataloaders_for_training(
     num_workers: int
         number of workers to be used for data loading (default: 8)
     random_state: int
-        random state to be used for split (default: 4)
+        random state to be used for split (default: 29)
 
     -------
     Returns
@@ -174,8 +174,10 @@ def get_dataloader_for_testing(
     list_images: List[str],
     list_labels: List[int],
     list_bands: List[str],
+    validation_size: float = 0.2,
     batch_size: int = 1,
     num_workers: int = 8,
+    random_state: int = 29,
 ) -> DataLoader:
     """
     ---------
@@ -187,10 +189,14 @@ def get_dataloader_for_testing(
         a list of labels corresponding to train image files
     list_bands: List[str]
         a list of sentinel-2 bands that needs to be used for testing
+    validation_size: float
+        size of validation set (default: 0.2)
     batch_size: int
         batch size to be used for testing (default: 1)
     num_workers: int
         number of workers to be used for data loading (default: 8)
+    random_state: int
+        random state to be used for split (default: 29)
 
     -------
     Returns
@@ -198,8 +204,15 @@ def get_dataloader_for_testing(
     test_loader: DataLoader
         an object for test dataset loader
     """
+    _, list_test_imgs, _, list_test_lbls = split_dataset(
+        list_images,
+        list_labels,
+        validation_size=validation_size,
+        random_state=random_state,
+    )
+
     test_dataset = EuroSATDataset(
-        list_images, list_labels, list_bands, is_train_set=False
+        list_test_imgs, list_test_lbls, list_bands, is_train_set=False
     )
     test_loader = DataLoader(
         test_dataset,
