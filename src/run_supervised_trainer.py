@@ -65,6 +65,8 @@ def parse_arguments() -> argparse.Namespace:
             "reskanet",
             "se_resnet",
             "se_reskanet",
+            "psa_resnet",
+            "psa_reskanet",
         ],
         help="model that needs to be trained",
     )
