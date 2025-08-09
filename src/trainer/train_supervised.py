@@ -18,14 +18,21 @@ from mlflow.models.signature import infer_signature
 
 from data_handler.file_utils import get_list_files_n_labels
 from data_handler.supervised_data_loader import get_dataloaders_for_training
-from models.msi_supervised import MSIEuroSATResNet, MSIEuroSATResKANet
 from metrics.compute_metrics import compute_base_metrics, compute_additional_metrics
+from models.msi_supervised import (
+    MSI_ResNet,
+    MSI_ResKANet,
+    MSI_SE_ResNet,
+    MSI_SE_ResKANet,
+)
 
 
 def train(
     model: Union[
-        MSIEuroSATResNet,
-        MSIEuroSATResKANet,
+        MSI_ResNet,
+        MSI_ResKANet,
+        MSI_SE_ResNet,
+        MSI_SE_ResKANet,
     ],
     optimizer: AdamW,
     criterion: CrossEntropyLoss,
@@ -39,7 +46,7 @@ def train(
     ---------
     Arguments
     ---------
-    model: Union[MSIEuroSATResNet, MSIEuroSATResKANet,]
+    model: Union[MSI_ResNet, MSI_ResKANet,]
         a valid object of type torch model
     optimizer: AdamW
         a valid object of type torch Optimizer
@@ -87,8 +94,10 @@ def train(
 
 def validate(
     model: Union[
-        MSIEuroSATResNet,
-        MSIEuroSATResKANet,
+        MSI_ResNet,
+        MSI_ResKANet,
+        MSI_SE_ResNet,
+        MSI_SE_ResKANet,
     ],
     criterion: CrossEntropyLoss,
     validation_loader: DataLoader,
@@ -100,7 +109,7 @@ def validate(
     ---------
     Arguments
     ---------
-    model: Union[MSIEuroSATResNet, MSIEuroSATResKANet,]
+    model: Union[MSI_ResNet, MSI_ResKANet,]
         an object of type torch model
     criterion: CrossEntropyLoss
         an object of type torch criterion function
@@ -136,8 +145,10 @@ def validate(
 
 def predict_n_compute_metrics(
     model: Union[
-        MSIEuroSATResNet,
-        MSIEuroSATResKANet,
+        MSI_ResNet,
+        MSI_ResKANet,
+        MSI_SE_ResNet,
+        MSI_SE_ResKANet,
     ],
     test_loader: DataLoader,
     device: torch.device,
@@ -149,7 +160,7 @@ def predict_n_compute_metrics(
     ---------
     Arguments
     ---------
-    model: Union[MSIEuroSATResNet, MSIEuroSATResKANet,]
+    model: Union[MSI_ResNet, MSI_ResKANet,]
         an object of type torch model
     test_loader: DataLoader
         an object of type torch dataloader
@@ -283,14 +294,28 @@ def train_pipeline(
     # logging.info(list_images[0:5], list_labels[0:5], list_class_names[0:5])
 
     if model_name == "resnet":
-        model = MSIEuroSATResNet(
+        model = MSI_ResNet(
             num_input_bands=num_input_bands,
             num_classes=num_classes,
             list_filters=list_filters,
             dropout_ratio=dropout_ratio,
         )
     elif model_name == "reskanet":
-        model = MSIEuroSATResKANet(
+        model = MSI_ResKANet(
+            num_input_bands=num_input_bands,
+            num_classes=num_classes,
+            list_filters=list_filters,
+            dropout_ratio=dropout_ratio,
+        )
+    elif model_name == "se_resnet":
+        model = MSI_SE_ResNet(
+            num_input_bands=num_input_bands,
+            num_classes=num_classes,
+            list_filters=list_filters,
+            dropout_ratio=dropout_ratio,
+        )
+    elif model_name == "se_reskanet":
+        model = MSI_SE_ResKANet(
             num_input_bands=num_input_bands,
             num_classes=num_classes,
             list_filters=list_filters,
