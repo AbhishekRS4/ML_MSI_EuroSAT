@@ -24,6 +24,8 @@ from models.msi_supervised import (
     MSI_ResKANet,
     MSI_SE_ResNet,
     MSI_SE_ResKANet,
+    MSI_PSA_ResNet,
+    MSI_PSA_ResKANet,
 )
 
 
@@ -33,6 +35,8 @@ def train(
         MSI_ResKANet,
         MSI_SE_ResNet,
         MSI_SE_ResKANet,
+        MSI_PSA_ResNet,
+        MSI_PSA_ResKANet,
     ],
     optimizer: AdamW,
     criterion: CrossEntropyLoss,
@@ -98,6 +102,8 @@ def validate(
         MSI_ResKANet,
         MSI_SE_ResNet,
         MSI_SE_ResKANet,
+        MSI_PSA_ResNet,
+        MSI_PSA_ResKANet,
     ],
     criterion: CrossEntropyLoss,
     validation_loader: DataLoader,
@@ -149,6 +155,8 @@ def predict_n_compute_metrics(
         MSI_ResKANet,
         MSI_SE_ResNet,
         MSI_SE_ResKANet,
+        MSI_PSA_ResNet,
+        MSI_PSA_ResKANet,
     ],
     test_loader: DataLoader,
     device: torch.device,
@@ -316,6 +324,20 @@ def train_pipeline(
         )
     elif model_name == "se_reskanet":
         model = MSI_SE_ResKANet(
+            num_input_bands=num_input_bands,
+            num_classes=num_classes,
+            list_filters=list_filters,
+            dropout_ratio=dropout_ratio,
+        )
+    elif model_name == "psa_resnet":
+        model = MSI_PSA_ResNet(
+            num_input_bands=num_input_bands,
+            num_classes=num_classes,
+            list_filters=list_filters,
+            dropout_ratio=dropout_ratio,
+        )
+    elif model_name == "psa_reskanet":
+        model = MSI_PSA_ResKANet(
             num_input_bands=num_input_bands,
             num_classes=num_classes,
             list_filters=list_filters,
