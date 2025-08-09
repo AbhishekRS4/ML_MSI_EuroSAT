@@ -396,7 +396,9 @@ def train_pipeline(
                 validation_rec,
                 validation_conf_matrix,
                 validation_clf_report,
-            ) = predict_n_compute_metrics(model, train_loader, device, list_class_names)
+            ) = predict_n_compute_metrics(
+                model, validation_loader, device, list_class_names
+            )
             time_end = time.time()
             logging.info(
                 f"Epoch: {epoch}/{num_epochs}, time: {time_end-time_start:.4f} sec."
