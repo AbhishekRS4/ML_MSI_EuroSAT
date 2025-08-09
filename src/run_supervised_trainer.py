@@ -63,6 +63,8 @@ def parse_arguments() -> argparse.Namespace:
         choices=[
             "resnet",
             "reskanet",
+            "se_resnet",
+            "se_reskanet",
         ],
         help="model that needs to be trained",
     )
