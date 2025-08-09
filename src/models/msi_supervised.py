@@ -6,7 +6,7 @@ from typing import List
 from kan import KANLayer
 
 
-from src.models.building_blocks import ResidualBlock, ChannelSpatialSELayer
+from models.building_blocks import ResidualBlock, ChannelSpatialSELayer
 
 
 class MSI_ResNet(nn.Module):
