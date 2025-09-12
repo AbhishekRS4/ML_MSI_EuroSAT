@@ -16,6 +16,22 @@ from data_handler.data_bands import get_band_indices
 def read_data_from_tiff(
     file_msi_raster: PosixPath, list_band_indices: Union[None, List[int]]
 ) -> np.ndarray:
+    """
+    ---------
+    Arguments
+    ---------
+
+    file_msi_raster: PosixPath
+        full path to the tif raster
+    list_band_indices: List[int]
+        a list of sentinel-2 band indices
+
+    -------
+    Returns
+    -------
+    msi_image: np.ndarray
+        an array of MSI with the selected bands
+    """
     msi_image = None
     with rio.open(file_msi_raster) as fd_msi_raster:
         if list_band_indices is not None:
@@ -25,7 +41,24 @@ def read_data_from_tiff(
     return msi_image
 
 
-def preprocess_msi_image(msi_image: torch.Tensor, threshold: int=10000) -> torch.Tensor:
+def preprocess_msi_image(
+    msi_image: torch.Tensor, threshold: int = pow(2, 14)
+) -> torch.Tensor:
+    """
+    ---------
+    Arguments
+    ---------
+    msi_image: torch.Tensor
+        a torch tensor of raw MSI with the selected bands
+    threshold: int
+        threshold that needs to be used for preprocessing
+
+    -------
+    Returns
+    -------
+    msi_image: torch.Tensor
+        a torch Tensor of preprocessed MSI with the selected bands
+    """
     msi_image = torch.clamp(msi_image, 0, threshold)
     msi_image = msi_image / threshold
     return msi_image
