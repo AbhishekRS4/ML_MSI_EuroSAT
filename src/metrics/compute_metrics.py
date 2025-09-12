@@ -139,7 +139,7 @@ def get_confusion_matrix_figure(
     conf_matrix: np.ndarray,
     list_label_names: Union[List[str], np.ndarray],
     scale_to_percent: bool = True,
-    cmap: str = "blues",
+    cmap: str = "Blues",
 ) -> ConfusionMatrixDisplay:
     """
     get confusion matrix figure
