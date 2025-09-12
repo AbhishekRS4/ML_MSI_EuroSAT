@@ -98,10 +98,23 @@ def parse_arguments() -> argparse.Namespace:
         help="the data bands that needs to used for training the model",
     )
     parser.add_argument(
+        "--checkpoint-type",
+        type=str,
+        default="torch_api",
+        choices=["torch_api", "mlflow_api"],
+        help="the type of checkpoint that needs to be saved",
+    )
+    parser.add_argument(
         "--output-log-file",
         type=str,
         default="trainer.log",
         help="full path to the logs file where training logs needs to be recorded",
+    )
+    parser.add_argument(
+        "--model-compile",
+        default=True,
+        action=argparse.BooleanOptionalAction,
+        help="whether to train the model using the compile option to reduce overhead",
     )
 
     ARGS, unparsed = parser.parse_known_args()
@@ -124,7 +137,9 @@ def main() -> None:
         validation_size=ARGS.validation_size,
         num_workers=ARGS.num_workers,
         data_bands=ARGS.data_bands,
+        checkpoint_type=ARGS.checkpoint_type,
         output_log_file=ARGS.output_log_file,
+        model_compile=ARGS.model_compile,
     )
     return
 
