@@ -30,9 +30,6 @@ class MetricsCalculator:
             an integer with the number of classes
         average: str
             a string indicating the type of averaging that needs to be performed for multi-class scenario (default: weighted)
-        conf_matrix_normalize: str
-            a string indicating the type of normalization to apply for the confusion matrix (default: true)
-
         """
         self.task = task
         self.device = device
@@ -54,13 +51,11 @@ class MetricsCalculator:
         self.conf_matrix_row_normalized = ConfusionMatrix(
             task=self.task,
             num_classes=self.num_classes,
-            average=self.average,
             normalize="true",
         ).to(self.device)
         self.conf_matrix_col_normalized = ConfusionMatrix(
             task=self.task,
             num_classes=self.num_classes,
-            average=self.average,
             normalize="pred",
         ).to(self.device)
 
