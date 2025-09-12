@@ -25,6 +25,12 @@ def read_data_from_tiff(
     return msi_image
 
 
+def preprocess_msi_image(msi_image: torch.Tensor, threshold: int=10000) -> torch.Tensor:
+    msi_image = torch.clamp(msi_image, 0, threshold)
+    msi_image = msi_image / threshold
+    return msi_image
+
+
 class EuroSATDataset(Dataset):
     def __init__(
         self,
@@ -64,19 +70,14 @@ class EuroSATDataset(Dataset):
     def __len__(self) -> int:
         return len(self.list_images)
 
-    def preprocess_msi_image(self, msi_image: torch.Tensor) -> torch.Tensor:
-        msi_image = torch.clamp(msi_image, 0, pow(2, 14))
-        msi_image = msi_image / pow(2, 14)
-        return msi_image
-
     def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
         file_msi_raster = self.list_images[idx]
-        msi_image = read_data_from_tiff(file_msi_raster)
+        msi_image = read_data_from_tiff(file_msi_raster, self.list_band_indices)
 
         msi_image = torch.from_numpy(msi_image.astype(np.float32))
         if self.is_train_set:
             msi_image = self.transform(msi_image)
-        msi_image = self.preprocess_msi_image(msi_image)
+        msi_image = preprocess_msi_image(msi_image)
 
         label = self.list_labels[idx]
         return msi_image, label
