@@ -33,7 +33,7 @@ def parse_arguments() -> argparse.Namespace:
         help="num workers to use for data loading",
     )
     parser.add_argument(
-        "--validation-size",
+        "--val-size",
         default=0.2,
         type=float,
         help="validation size to be used for splitting the dataset",
@@ -134,7 +134,7 @@ def main() -> None:
         learning_rate=ARGS.learning_rate,
         weight_decay=ARGS.weight_decay,
         batch_size=ARGS.batch_size,
-        validation_size=ARGS.validation_size,
+        val_size=ARGS.val_size,
         num_workers=ARGS.num_workers,
         data_bands=ARGS.data_bands,
         checkpoint_type=ARGS.checkpoint_type,
