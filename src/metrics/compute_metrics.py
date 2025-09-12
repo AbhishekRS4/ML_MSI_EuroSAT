@@ -1,163 +1,178 @@
+import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
 from torch import Tensor
 from typing import List, Tuple, Union, Dict
-from sklearn.metrics import (
-    precision_score,
-    recall_score,
-    accuracy_score,
-    f1_score,
-    confusion_matrix,
-    classification_report,
-    ConfusionMatrixDisplay,
-)
+from sklearn.metrics import ConfusionMatrixDisplay
+from torchmetrics import Accuracy, F1Score, Precision, Recall, ConfusionMatrix
 
 
-def compute_base_metrics(
-    true_labels: Tensor,
-    pred_labels: Tensor,
-    average: str = "weighted",
-) -> Tuple[float, float, float, float]:
+class MetricsCalculator:
+    def __init__(
+        self,
+        device: torch.device,
+        task: str = "multiclass",
+        num_classes: int = 10,
+        average: str = "weighted",
+    ):
+        """
+        MetricsCalculator class to compute some of the important metrics
+
+        ----------
+        Attributes
+        ----------
+        device: torch.device
+            indicates the torch device type
+        task: str
+            a string indicating the task (default: multiclass)
+        num_classes: int
+            an integer with the number of classes
+        average: str
+            a string indicating the type of averaging that needs to be performed for multi-class scenario (default: weighted)
+        conf_matrix_normalize: str
+            a string indicating the type of normalization to apply for the confusion matrix (default: true)
+
+        """
+        self.task = task
+        self.device = device
+        self.average = average
+        self.num_classes = num_classes
+
+        self.accuracy_scorer = Accuracy(
+            task=self.task, num_classes=self.num_classes
+        ).to(self.device)
+        self.f1_scorer = F1Score(
+            task=self.task, num_classes=self.num_classes, average=self.average
+        ).to(self.device)
+        self.precision_scorer = Precision(
+            task=self.task, num_classes=self.num_classes, average=self.average
+        ).to(self.device)
+        self.recall_scorer = Recall(
+            task=self.task, num_classes=self.num_classes, average=self.average
+        ).to(self.device)
+        self.conf_matrix_row_normalized = ConfusionMatrix(
+            task=self.task,
+            num_classes=self.num_classes,
+            average=self.average,
+            normalize="true",
+        ).to(self.device)
+        self.conf_matrix_col_normalized = ConfusionMatrix(
+            task=self.task,
+            num_classes=self.num_classes,
+            average=self.average,
+            normalize="pred",
+        ).to(self.device)
+
+    def compute_base_metrics(
+        self,
+        true_labels: Tensor,
+        pred_labels: Tensor,
+    ) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
+        """
+        compute base metrics
+
+        ---------
+        Arguments
+        ---------
+        true_labels: Tensor
+            a torch tensor of true labels
+        pred_labels: Tensor
+            a torch tensor of predicted labels
+
+        -------
+        Returns
+        -------
+        (acc_sc, f1_sc, pre_sc, rec_sc): Tuple[Tensor, Tensor, Tensor, Tensor]
+            a tuple of base metrics like accuracy, f1, precision, recall
+        """
+        true_labels = true_labels.view(-1)
+        pred_labels = pred_labels.view(-1)
+
+        acc_sc = self.accuracy_scorer(pred_labels, true_labels)
+        f1_sc = self.f1_scorer(pred_labels, true_labels)
+        pre_sc = self.precision_scorer(pred_labels, true_labels)
+        rec_sc = self.recall_scorer(pred_labels, true_labels)
+
+        return acc_sc, f1_sc, pre_sc, rec_sc
+
+    def update_confusion_matrix(
+        self,
+        true_labels: Tensor,
+        pred_labels: Tensor,
+    ) -> None:
+        """
+        update the confusion matrix
+
+        ---------
+        Arguments
+        ---------
+        true_labels: Tensor
+            a torch tensor of true labels
+        pred_labels: Tensor
+            a torch tensor of predicted labels
+        """
+        self.conf_matrix_row_normalized.update(pred_labels, true_labels)
+        self.conf_matrix_col_normalized.update(pred_labels, true_labels)
+        return
+
+    def compute_confusion_matrix(self) -> Tensor:
+        """
+        compute confusion matrix
+
+        -------
+        Returns
+        -------
+        conf_matrix: Tensor
+            a tensor of confusion matrix
+        """
+        return (
+            self.conf_matrix_row_normalized.compute(),
+            self.conf_matrix_col_normalized.compute(),
+        )
+
+    def reset_confusion_matrix(self) -> None:
+        """
+        reset the confusion matrix
+        """
+        self.conf_matrix_row_normalized.reset()
+        self.conf_matrix_col_normalized.reset()
+        return
+
+
+def get_confusion_matrix_figure(
+    conf_matrix: np.ndarray,
+    list_label_names: Union[List[str], np.ndarray],
+    scale_to_percent: bool = True,
+    cmap: str = "blues",
+) -> ConfusionMatrixDisplay:
     """
-    compute base metrics
+    get confusion matrix figure
 
     ---------
     Arguments
     ---------
-    true_labels: Tensor
-        a torch tensor of true labels
-    pred_labels: Tensor
-        a torch tensor of predicted labels
-    average: str
-        a string indicating the kind of averaging that needs to be performed for multi-class scenario (default: weighted)
-
-    -------
-    Returns
-    -------
-    (acc_sc, f1_sc, pre_sc, rec_sc): Tuple[float, float, float, float]
-        a tuple of base metrics like accuracy, f1, precision, recall
-    """
-    true_labels = true_labels.clone().detach().cpu().numpy()
-    pred_labels = pred_labels.clone().detach().cpu().numpy()
-
-    true_labels = true_labels.reshape(-1)
-    pred_labels = pred_labels.reshape(-1)
-
-    acc_sc = accuracy_score(true_labels, pred_labels)
-    f1_sc = f1_score(true_labels, pred_labels, average=average)
-    pre_sc = precision_score(true_labels, pred_labels, average=average)
-    rec_sc = recall_score(true_labels, pred_labels, average=average)
-
-    return acc_sc, f1_sc, pre_sc, rec_sc
-
-
-def compute_confusion_matrix(
-    true_labels: np.ndarray,
-    pred_labels: np.ndarray,
-    list_label_names: np.ndarray,
-    cmap: str = "Blues",
-) -> Tuple[np.ndarray, ConfusionMatrixDisplay]:
-    """
-    compute confusion matrix
-
-    ---------
-    Arguments
-    ---------
-    true_labels: np.ndarray
-        a torch tensor of true labels
-    pred_labels: np.ndarray
-        a torch tensor of predicted labels
-    list_label_names: np.ndarray
-        a numpy array of class label names
+    conf_matrix: np.ndarray
+        a numpy array of confusion matrix
+    list_label_names: Union[List[str] np.ndarray]
+        a list or numpy array of class label names
+    scale_to_percent: bool
+        a boolean indicating whether to scale the confusion matrix to percentage (default: True)
     cmap: str
-        a string indicating the cmap to be used in the confusion matrix plot (default: cmap)
+        a string indicating the cmap to be used in the confusion matrix plot (default: blues)
 
     -------
     Returns
     -------
-    (conf_matrix, conf_matrix_fig): Tuple[np.ndarray, ConfusionMatrixDisplay]
-        a tuple of numpy array of confusion matrix and a plot of confusion matrix figure
+    conf_matrix_fig: ConfusionMatrixDisplay
+        a figure of confusion matrix
     """
-    conf_matrix = confusion_matrix(
-        true_labels,
-        pred_labels,
-        labels=np.arange(len(list_label_names)),
-        normalize="true",
-    )
+    if scale_to_percent:
+        conf_matrix *= 100
 
     conf_matrix_fig = ConfusionMatrixDisplay(
         confusion_matrix=conf_matrix, display_labels=list_label_names
     )
     fig, ax = plt.subplots(figsize=(12, 12))
     conf_matrix_fig.plot(cmap=cmap, xticks_rotation="vertical", ax=ax)
-    return conf_matrix, conf_matrix_fig
-
-
-def compute_classification_report(
-    true_labels: np.ndarray,
-    pred_labels: np.ndarray,
-    list_label_names: np.ndarray,
-) -> str:
-    """
-    compute classification report
-
-    ---------
-    Arguments
-    ---------
-    true_labels: np.ndarray
-        a torch tensor of true labels
-    pred_labels: np.ndarray
-        a torch tensor of predicted labels
-    list_label_names: np.ndarray
-        a numpy array of class label names
-
-    -------
-    Returns
-    -------
-    clf_report: str
-        a string of classificaition report
-    """
-    clf_report = classification_report(
-        true_labels,
-        pred_labels,
-        labels=np.arange(len(list_label_names)),
-        target_names=list_label_names,
-    )
-
-    return clf_report
-
-
-def compute_additional_metrics(
-    true_labels: Tensor, pred_labels: Tensor, list_label_names: np.ndarray
-) -> Tuple[ConfusionMatrixDisplay, str]:
-    """
-    compute additional metrics for logging
-
-    ---------
-    Arguments
-    ---------
-    true_labels: Tensor
-        a torch tensor of true labels
-    pred_labels: Tensor
-        a torch tensor of predicted labels
-    list_label_names: np.ndarray
-        a numpy array of class label names
-
-    -------
-    Returns
-    -------
-    conf_matrix_fig, clf_report: Tuple[ConfusionMatrixDisplay, str]
-        a tuple of confusion matrix plot and a string of classification report
-    """
-    true_labels = true_labels.view(-1).clone().detach().cpu().numpy()
-    pred_labels = pred_labels.view(-1).clone().detach().cpu().numpy()
-
-    _, conf_matrix_fig = compute_confusion_matrix(
-        true_labels, pred_labels, list_label_names
-    )
-    clf_report = compute_classification_report(
-        true_labels, pred_labels, list_label_names
-    )
-
-    return conf_matrix_fig, clf_report
+    return conf_matrix_fig
