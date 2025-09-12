@@ -6,6 +6,7 @@ import mlflow
 import logging
 import numpy as np
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 from pathlib import Path
 from copy import deepcopy
@@ -329,8 +330,6 @@ def train_pipeline(
         )
     )
 
-    # logging.info(list_images[0:5], list_labels[0:5], list_class_names[0:5])
-
     if model_name == "resnet":
         model = MSI_ResNet(
             num_input_bands=num_input_bands,
@@ -422,6 +421,8 @@ def train_pipeline(
         mlflow.log_param("dataset.dir_dataset", dir_dataset)
         mlflow.log_param("dataset.list_class_names", list_class_names)
         mlflow.log_param("dataset.validation_size", val_size)
+        mlflow.log_text("\n".join(list_train_imgs), "dataset_list_train_images.txt")
+        mlflow.log_text("\n".join(list_val_imgs), "dataset_list_val_images.txt")
 
         mlflow.log_param("model.model_name", model_name)
         mlflow.log_param("model.list_filters", list_filters)
@@ -488,6 +489,7 @@ def train_pipeline(
 
             if val_acc >= best_val_acc:
                 best_val_acc = val_acc
+                # get the confusion matrix figures
                 train_conf_mat_row_norm_fig = get_confusion_matrix_figure(
                     train_conf_mat_row_norm, list_class_names
                 )
@@ -501,6 +503,7 @@ def train_pipeline(
                     val_conf_mat_col_norm, list_class_names
                 )
 
+                # log all the confusion matrix figures
                 mlflow.log_figure(
                     train_conf_mat_row_norm_fig.figure_,
                     f"train_conf_mat_row_norm_{epoch}.png",
@@ -517,6 +520,12 @@ def train_pipeline(
                     val_conf_mat_col_norm_fig.figure_,
                     f"val_conf_mat_col_norm_{epoch}.png",
                 )
+
+                # close all the confusion matrix figures
+                plt.close(train_conf_mat_row_norm_fig.figure_)
+                plt.close(train_conf_mat_row_norm_fig.figure_)
+                plt.close(train_conf_mat_row_norm_fig.figure_)
+                plt.close(train_conf_mat_row_norm_fig.figure_)
 
                 if checkpoint_type == "mlflow_api":
                     example_input, _ = next(iter(val_loader))
