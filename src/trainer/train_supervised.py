@@ -420,6 +420,8 @@ def train_pipeline(
         mlflow.log_param("dataset.dir_dataset", dir_dataset)
         mlflow.log_param("dataset.list_class_names", list_class_names)
         mlflow.log_param("dataset.validation_size", val_size)
+        mlflow.log_param("dataset.num_train_imgs", len(list_train_imgs))
+        mlflow.log_param("dataset.num_val_imgs", len(list_val_imgs))
         mlflow.log_text("\n".join(list_train_imgs), "dataset_list_train_images.txt")
         mlflow.log_text("\n".join(list_val_imgs), "dataset_list_val_images.txt")
 
@@ -427,6 +429,7 @@ def train_pipeline(
         mlflow.log_param("model.list_filters", list_filters)
         mlflow.log_param("model.num_input_bands", num_input_bands)
         mlflow.log_param("model.dropout_ratio", dropout_ratio)
+        mlflow.log_param("model.checkpoint_type", checkpoint_type)
 
         for epoch in range(1, num_epochs + 1):
             time_start = time.time()
