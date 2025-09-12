@@ -385,7 +385,6 @@ def train_pipeline(
         weight_decay=weight_decay,
         betas=(0.9, 0.95),
     )
-
     lr_scheduler = PolynomialLR(
         optimizer,
         num_epochs + 1,
@@ -523,9 +522,9 @@ def train_pipeline(
 
                 # close all the confusion matrix figures
                 plt.close(train_conf_mat_row_norm_fig.figure_)
-                plt.close(train_conf_mat_row_norm_fig.figure_)
-                plt.close(train_conf_mat_row_norm_fig.figure_)
-                plt.close(train_conf_mat_row_norm_fig.figure_)
+                plt.close(train_conf_mat_col_norm_fig.figure_)
+                plt.close(val_conf_mat_row_norm_fig.figure_)
+                plt.close(val_conf_mat_col_norm_fig.figure_)
 
                 if checkpoint_type == "mlflow_api":
                     example_input, _ = next(iter(val_loader))
