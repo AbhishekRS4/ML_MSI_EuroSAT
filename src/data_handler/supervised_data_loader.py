@@ -86,7 +86,7 @@ def split_dataset(
     list_images: List[str],
     list_labels: List[int],
     random_state: int = 29,
-    validation_size: float = 0.2,
+    val_size: float = 0.2,
 ) -> Tuple[List[str], List[str], List[int], List[int]]:
     """
     ---------
@@ -98,7 +98,7 @@ def split_dataset(
         a list of labels corresponding to train image files
     random_state: int
         random state to be used for split (default: 29)
-    validation_size: float
+    val_size: float
         size of validation set (default: 0.2)
 
     -------
@@ -110,7 +110,7 @@ def split_dataset(
     list_train_imgs, list_val_imgs, list_train_lbls, list_val_lbls = train_test_split(
         list_images,
         list_labels,
-        test_size=validation_size,
+        test_size=val_size,
         random_state=random_state,
     )
     return list_train_imgs, list_val_imgs, list_train_lbls, list_val_lbls
