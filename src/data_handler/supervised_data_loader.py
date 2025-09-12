@@ -181,6 +181,9 @@ def get_dataloaders_for_training(
         pin_memory=True,
         persistent_workers=True,
     )
+
+    list_train_imgs = [f.name for f in list_train_imgs]
+    list_val_imgs = [f.name for f in list_val_imgs]
     return train_loader, val_loader, list_train_imgs, list_val_imgs
 
 
