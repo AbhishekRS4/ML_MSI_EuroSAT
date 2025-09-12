@@ -46,7 +46,7 @@ def train_model(
     device: torch.device,
     scaler: GradScaler,
     metrics_calculator: MetricsCalculator,
-) -> Tuple[float, float, float, float, float, np.ndarray]:
+) -> Tuple[float, float, float, float, float, np.ndarray, np.ndarray]:
     """
     train loop
 
@@ -150,7 +150,7 @@ def test_model(
     test_loader: DataLoader,
     device: torch.device,
     metrics_calculator: MetricsCalculator,
-) -> Tuple[float, float, float, float, float, np.ndarray]:
+) -> Tuple[float, float, float, float, float, np.ndarray, np.ndarray]:
     """
     test loop
 
@@ -171,7 +171,7 @@ def test_model(
     -------
     Returns
     -------
-    (test_loss, test_acc, test_f1, test_prec, test_rec, test_conf_matrix):
+    (test_loss, test_acc, test_f1, test_prec, test_rec, test_conf_mat_row_norm, test_conf_mat_col_norm):
     Tuple[float, float, float, float, float, np.ndarray, np.ndarray]
         a tuple of training loss, accuracy, f1-score, precision, recall and confusion matrices
     """
@@ -239,7 +239,7 @@ def train_pipeline(
     learning_rate: float = 1e-3,
     weight_decay: float = 5e-5,
     batch_size: int = 64,
-    validation_size: float = 0.2,
+    val_size: float = 0.2,
     num_workers: int = 8,
     data_bands: List[str] = ["B", "G", "R"],
     checkpoint_type: str = "torch_api",
@@ -273,7 +273,7 @@ def train_pipeline(
         weight decay to be used for training (default: 5e-5)
     batch_size: int
         batch size to be used for training (default: 64)
-    validation_size: float
+    val_size: float
         validation set size (default: 0.2)
     num_workers: int
         number of workers to be used for data loading (default: 8)
@@ -323,7 +323,7 @@ def train_pipeline(
             list_imgs,
             list_lbls,
             data_bands,
-            validation_size=validation_size,
+            val_size=val_size,
             batch_size=batch_size,
             num_workers=num_workers,
         )
@@ -421,7 +421,7 @@ def train_pipeline(
         mlflow.log_param("dataset.num_classes", num_classes)
         mlflow.log_param("dataset.dir_dataset", dir_dataset)
         mlflow.log_param("dataset.list_class_names", list_class_names)
-        mlflow.log_param("dataset.validation_size", validation_size)
+        mlflow.log_param("dataset.validation_size", val_size)
 
         mlflow.log_param("model.model_name", model_name)
         mlflow.log_param("model.list_filters", list_filters)
