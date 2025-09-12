@@ -6,10 +6,23 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
-from typing import List, Tuple
+from pathlib import PosixPath
+from typing import List, Tuple, Union
 
 
 from data_handler.data_bands import get_band_indices
+
+
+def read_data_from_tiff(
+    file_msi_raster: PosixPath, list_band_indices: Union[None, List[int]]
+) -> np.ndarray:
+    msi_image = None
+    with rio.open(file_msi_raster) as fd_msi_raster:
+        if list_band_indices is not None:
+            msi_image = fd_msi_raster.read(list_band_indices)
+        else:
+            msi_image = fd_msi_raster.read()
+    return msi_image
 
 
 class EuroSATDataset(Dataset):
@@ -58,8 +71,8 @@ class EuroSATDataset(Dataset):
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
         file_msi_raster = self.list_images[idx]
-        fd_msi_raster = rio.open(file_msi_raster)
-        msi_image = fd_msi_raster.read(self.list_band_indices)
+        msi_image = read_data_from_tiff(file_msi_raster)
+
         msi_image = torch.from_numpy(msi_image.astype(np.float32))
         if self.is_train_set:
             msi_image = self.transform(msi_image)
@@ -91,29 +104,27 @@ def split_dataset(
     -------
     Returns
     -------
-    (list_train_imgs, list_validation_imgs, list_train_lbls, list_validation_lbls): Tuple[List[str], List[str], List[int], List[int]]
+    (list_train_imgs, list_val_imgs, list_train_lbls, list_val_lbls): Tuple[List[str], List[str], List[int], List[int]]
         a n-tuple of training and validation image files and their corresponding labels
     """
-    list_train_imgs, list_validation_imgs, list_train_lbls, list_validation_lbls = (
-        train_test_split(
-            list_images,
-            list_labels,
-            test_size=validation_size,
-            random_state=random_state,
-        )
+    list_train_imgs, list_val_imgs, list_train_lbls, list_val_lbls = train_test_split(
+        list_images,
+        list_labels,
+        test_size=validation_size,
+        random_state=random_state,
     )
-    return list_train_imgs, list_validation_imgs, list_train_lbls, list_validation_lbls
+    return list_train_imgs, list_val_imgs, list_train_lbls, list_val_lbls
 
 
 def get_dataloaders_for_training(
     list_images: List[str],
     list_labels: List[int],
     list_bands: List[str],
-    validation_size: float = 0.2,
+    val_size: float = 0.2,
     batch_size: int = 64,
     num_workers: int = 8,
     random_state: int = 29,
-) -> Tuple[DataLoader, DataLoader]:
+) -> Tuple[DataLoader, DataLoader, List[str], List[str]]:
     """
     ---------
     Arguments
@@ -124,7 +135,7 @@ def get_dataloaders_for_training(
         a list of labels corresponding to train image files
     list_bands: List[str]
         a list of sentinel-2 bands that needs to be used for training
-    validation_size: float
+    val_size: float
         size of validation set (default: 0.2)
     batch_size: int
         batch size to be used for training and validation (default: 64)
@@ -136,23 +147,21 @@ def get_dataloaders_for_training(
     -------
     Returns
     -------
-    (train_loader, validation_loader): Tuple[DataLoader, DataLoader]
+    (train_loader, val_loader, list_train_imgs, list_val_imgs): Tuple[DataLoader, DataLoader, List[str], List[str]]
         a tuple of objects for training and validation dataset loaders
     """
-    list_train_imgs, list_validation_imgs, list_train_lbls, list_validation_lbls = (
-        split_dataset(
-            list_images,
-            list_labels,
-            validation_size=validation_size,
-            random_state=random_state,
-        )
+    list_train_imgs, list_val_imgs, list_train_lbls, list_val_lbls = split_dataset(
+        list_images,
+        list_labels,
+        val_size=val_size,
+        random_state=random_state,
     )
 
     train_dataset = EuroSATDataset(
         list_train_imgs, list_train_lbls, list_bands, is_train_set=True
     )
-    validation_dataset = EuroSATDataset(
-        list_validation_imgs, list_validation_lbls, list_bands, is_train_set=False
+    val_dataset = EuroSATDataset(
+        list_val_imgs, list_val_lbls, list_bands, is_train_set=False
     )
 
     train_loader = DataLoader(
@@ -160,25 +169,29 @@ def get_dataloaders_for_training(
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=True,
     )
-    validation_loader = DataLoader(
-        validation_dataset,
+    val_loader = DataLoader(
+        val_dataset,
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=True,
     )
-    return train_loader, validation_loader
+    return train_loader, val_loader, list_train_imgs, list_val_imgs
 
 
 def get_dataloader_for_testing(
     list_images: List[str],
     list_labels: List[int],
     list_bands: List[str],
-    validation_size: float = 0.2,
+    val_size: float = 0.2,
     batch_size: int = 1,
     num_workers: int = 8,
     random_state: int = 29,
-) -> DataLoader:
+) -> Tuple[DataLoader, List[str]]:
     """
     ---------
     Arguments
@@ -189,7 +202,7 @@ def get_dataloader_for_testing(
         a list of labels corresponding to train image files
     list_bands: List[str]
         a list of sentinel-2 bands that needs to be used for testing
-    validation_size: float
+    val_size: float
         size of validation set (default: 0.2)
     batch_size: int
         batch size to be used for testing (default: 1)
@@ -207,7 +220,7 @@ def get_dataloader_for_testing(
     _, list_test_imgs, _, list_test_lbls = split_dataset(
         list_images,
         list_labels,
-        validation_size=validation_size,
+        val_size=val_size,
         random_state=random_state,
     )
 
@@ -219,5 +232,7 @@ def get_dataloader_for_testing(
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=True,
     )
-    return test_loader
+    return test_loader, list_test_imgs
