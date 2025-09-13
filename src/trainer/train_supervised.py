@@ -293,7 +293,7 @@ def train_pipeline(
 
     num_input_bands = len(data_bands)
     list_imgs, list_lbls, list_class_names = get_list_files_n_labels(dir_dataset)
-    num_classes = list_lbls[-1] + 1
+    num_classes = len(list_class_names)
 
     num_data_samples = len(list_imgs)
     logging.info(f"Num data samples: {num_data_samples}")
@@ -353,9 +353,9 @@ def train_pipeline(
         )
     else:
         logging.info(f"Unidentified option for arg (model_name): {model_name}")
-    model.to(device)
     if model_compile:
         model = torch.compile(model, mode="reduce-overhead")
+    model.to(device)
 
     metrics_calculator = MetricsCalculator(device, num_classes=num_classes)
     optimizer = torch.optim.AdamW(
