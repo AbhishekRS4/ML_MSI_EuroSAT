@@ -79,34 +79,22 @@ def train_model(
     model.to(device)
     model.train()
     num_train_batches = len(train_loader)
+    metrics_calculator.reset_metrics()
 
     running_train_loss = torch.zeros(1).to(device)
-    running_train_acc = torch.zeros(1).to(device)
-    running_train_f1 = torch.zeros(1).to(device)
-    running_train_prec = torch.zeros(1).to(device)
-    running_train_rec = torch.zeros(1).to(device)
-    metrics_calculator.reset_confusion_matrix()
 
-    for msi_bands, gt_labels in train_loader:
+    for msi_bands, true_labels in train_loader:
         msi_bands = msi_bands.to(device, dtype=torch.float)
-        gt_labels = gt_labels.to(device, dtype=torch.long)
+        true_labels = true_labels.to(device, dtype=torch.long)
 
         optimizer.zero_grad()
         # run forward pass with autocast
         with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
             pred_logits = model(msi_bands)
-            loss = criterion(pred_logits, gt_labels)
+            loss = criterion(pred_logits, true_labels)
             pred_labels = torch.argmax(pred_logits, dim=1)
-
-            acc, f1, prec, rec = metrics_calculator.compute_base_metrics(
-                gt_labels, pred_labels
-            )
+            metrics_calculator.update_metrics(true_labels, pred_labels)
             running_train_loss += loss
-            running_train_acc += acc
-            running_train_f1 += f1
-            running_train_prec += prec
-            running_train_rec += rec
-            metrics_calculator.update_confusion_matrix(gt_labels, pred_labels)
 
         # loss is scaled and then scaled gradients are created
         scaler.scale(loss).backward()
@@ -115,24 +103,25 @@ def train_model(
         # update the scaler for the next iteration
         scaler.update()
 
-    train_loss = float(running_train_loss) / num_train_batches
-    train_acc = float(running_train_acc) / num_train_batches
-    train_f1 = float(running_train_f1) / num_train_batches
-    train_prec = float(running_train_prec) / num_train_batches
-    train_rec = float(running_train_rec) / num_train_batches
+    train_loss = running_train_loss / num_train_batches
 
-    train_conf_mat_row_norm, train_conf_mat_col_norm = (
-        metrics_calculator.compute_confusion_matrix()
-    )
-    train_conf_mat_row_norm = train_conf_mat_row_norm.clone().detach().cpu().numpy()
-    train_conf_mat_col_norm = train_conf_mat_col_norm.clone().detach().cpu().numpy()
-
-    return (
-        train_loss,
+    (
         train_acc,
         train_f1,
         train_prec,
         train_rec,
+        train_conf_mat_row_norm,
+        train_conf_mat_col_norm,
+    ) = metrics_calculator.compute_metrics()
+    train_conf_mat_row_norm = train_conf_mat_row_norm.clone().detach().cpu().numpy()
+    train_conf_mat_col_norm = train_conf_mat_col_norm.clone().detach().cpu().numpy()
+
+    return (
+        float(train_loss),
+        float(train_acc),
+        float(train_f1),
+        float(train_prec),
+        float(train_rec),
         train_conf_mat_row_norm,
         train_conf_mat_col_norm,
     )
@@ -179,51 +168,41 @@ def test_model(
     model.to(device)
     model.eval()
     num_test_batches = len(test_loader)
+    metrics_calculator.reset_metrics()
 
     running_test_loss = torch.zeros(1).to(device)
-    running_test_acc = torch.zeros(1).to(device)
-    running_test_f1 = torch.zeros(1).to(device)
-    running_test_prec = torch.zeros(1).to(device)
-    running_test_rec = torch.zeros(1).to(device)
-    metrics_calculator.reset_confusion_matrix()
 
     with torch.no_grad():
-        for msi_bands, gt_labels in test_loader:
+        for msi_bands, true_labels in test_loader:
             msi_bands = msi_bands.to(device, dtype=torch.float)
-            gt_labels = gt_labels.to(device, dtype=torch.long)
+            true_labels = true_labels.to(device, dtype=torch.long)
 
             pred_logits = model(msi_bands)
-            loss = criterion(pred_logits, gt_labels)
+            loss = criterion(pred_logits, true_labels)
             pred_labels = torch.argmax(pred_logits, dim=1)
 
-            acc, f1, prec, rec = metrics_calculator.compute_base_metrics(
-                gt_labels, pred_labels
-            )
+            metrics_calculator.update_metrics(true_labels, pred_labels)
             running_test_loss += loss
-            running_test_acc += acc
-            running_test_f1 += f1
-            running_test_prec += prec
-            running_test_rec += rec
-            metrics_calculator.update_confusion_matrix(gt_labels, pred_labels)
 
-    test_loss = float(running_test_loss) / num_test_batches
-    test_acc = float(running_test_acc) / num_test_batches
-    test_f1 = float(running_test_f1) / num_test_batches
-    test_prec = float(running_test_prec) / num_test_batches
-    test_rec = float(running_test_rec) / num_test_batches
+    test_loss = running_test_loss / num_test_batches
 
-    test_conf_mat_row_norm, test_conf_mat_col_norm = (
-        metrics_calculator.compute_confusion_matrix()
-    )
-    test_conf_mat_row_norm = test_conf_mat_row_norm.clone().detach().cpu().numpy()
-    test_conf_mat_col_norm = test_conf_mat_col_norm.clone().detach().cpu().numpy()
-
-    return (
-        test_loss,
+    (
         test_acc,
         test_f1,
         test_prec,
         test_rec,
+        test_conf_mat_row_norm,
+        test_conf_mat_col_norm,
+    ) = metrics_calculator.compute_metrics()
+    test_conf_mat_row_norm = test_conf_mat_row_norm.clone().detach().cpu().numpy()
+    test_conf_mat_col_norm = test_conf_mat_col_norm.clone().detach().cpu().numpy()
+
+    return (
+        float(test_loss),
+        float(test_acc),
+        float(test_f1),
+        float(test_prec),
+        float(test_rec),
         test_conf_mat_row_norm,
         test_conf_mat_col_norm,
     )
