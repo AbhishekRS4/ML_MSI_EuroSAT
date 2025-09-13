@@ -36,68 +36,36 @@ class MetricsCalculator:
         self.average = average
         self.num_classes = num_classes
 
-        self.accuracy_scorer = Accuracy(
+        self.accuracy_score = Accuracy(
             task=self.task, num_classes=self.num_classes
         ).to(self.device)
-        self.f1_scorer = F1Score(
+        self.f1_score = F1Score(
             task=self.task, num_classes=self.num_classes, average=self.average
         ).to(self.device)
-        self.precision_scorer = Precision(
+        self.precision_score = Precision(
             task=self.task, num_classes=self.num_classes, average=self.average
         ).to(self.device)
-        self.recall_scorer = Recall(
+        self.recall_score = Recall(
             task=self.task, num_classes=self.num_classes, average=self.average
         ).to(self.device)
-        self.conf_matrix_row_normalized = ConfusionMatrix(
+        self.conf_matrix_row_norm = ConfusionMatrix(
             task=self.task,
             num_classes=self.num_classes,
             normalize="true",
         ).to(self.device)
-        self.conf_matrix_col_normalized = ConfusionMatrix(
+        self.conf_matrix_col_norm = ConfusionMatrix(
             task=self.task,
             num_classes=self.num_classes,
             normalize="pred",
         ).to(self.device)
 
-    def compute_base_metrics(
-        self,
-        true_labels: Tensor,
-        pred_labels: Tensor,
-    ) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
-        """
-        compute base metrics
-
-        ---------
-        Arguments
-        ---------
-        true_labels: Tensor
-            a torch tensor of true labels
-        pred_labels: Tensor
-            a torch tensor of predicted labels
-
-        -------
-        Returns
-        -------
-        (acc_sc, f1_sc, pre_sc, rec_sc): Tuple[Tensor, Tensor, Tensor, Tensor]
-            a tuple of base metrics like accuracy, f1, precision, recall
-        """
-        true_labels = true_labels.view(-1)
-        pred_labels = pred_labels.view(-1)
-
-        acc_sc = self.accuracy_scorer(pred_labels, true_labels)
-        f1_sc = self.f1_scorer(pred_labels, true_labels)
-        pre_sc = self.precision_scorer(pred_labels, true_labels)
-        rec_sc = self.recall_scorer(pred_labels, true_labels)
-
-        return acc_sc, f1_sc, pre_sc, rec_sc
-
-    def update_confusion_matrix(
+    def update_metrics(
         self,
         true_labels: Tensor,
         pred_labels: Tensor,
     ) -> None:
         """
-        update the confusion matrix
+        update the metrics
 
         ---------
         Arguments
@@ -107,31 +75,47 @@ class MetricsCalculator:
         pred_labels: Tensor
             a torch tensor of predicted labels
         """
-        self.conf_matrix_row_normalized.update(pred_labels, true_labels)
-        self.conf_matrix_col_normalized.update(pred_labels, true_labels)
+        true_labels = true_labels.view(-1)
+        pred_labels = pred_labels.view(-1)
+
+        self.accuracy_score.update(pred_labels, true_labels)
+        self.f1_score.update(pred_labels, true_labels)
+        self.precision_score.update(pred_labels, true_labels)
+        self.recall_score.update(pred_labels, true_labels)
+        self.conf_matrix_row_norm.update(pred_labels, true_labels)
+        self.conf_matrix_col_norm.update(pred_labels, true_labels)
         return
 
-    def compute_confusion_matrix(self) -> Tensor:
+    def compute_metrics(self) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
         """
-        compute confusion matrix
+        compute the metrics
 
         -------
         Returns
         -------
-        conf_matrix: Tensor
-            a tensor of confusion matrix
+        (acc_sc, f1_sc, pre_sc, rec_sc, conf_matrix_row_norm, conf_matrix_col_norm): 
+            Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]
+            a tuple of base metrics like accuracy, f1, precision, recall
         """
         return (
-            self.conf_matrix_row_normalized.compute(),
-            self.conf_matrix_col_normalized.compute(),
+            self.accuracy_score.compute(),
+            self.f1_score.compute(),
+            self.precision_score.compute(),
+            self.recall_score.compute(),
+            self.conf_matrix_row_norm.compute(),
+            self.conf_matrix_col_norm.compute(),
         )
 
-    def reset_confusion_matrix(self) -> None:
+    def reset_metrics(self) -> None:
         """
-        reset the confusion matrix
+        reset the metrics
         """
-        self.conf_matrix_row_normalized.reset()
-        self.conf_matrix_col_normalized.reset()
+        self.accuracy_score.reset()
+        self.f1_score.reset()
+        self.precision_score.reset()
+        self.recall_score.reset()
+        self.conf_matrix_row_norm.reset()
+        self.conf_matrix_col_norm.reset()
         return
 
 
