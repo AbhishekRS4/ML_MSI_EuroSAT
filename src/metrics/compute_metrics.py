@@ -36,9 +36,9 @@ class MetricsCalculator:
         self.average = average
         self.num_classes = num_classes
 
-        self.accuracy_score = Accuracy(
-            task=self.task, num_classes=self.num_classes
-        ).to(self.device)
+        self.accuracy_score = Accuracy(task=self.task, num_classes=self.num_classes).to(
+            self.device
+        )
         self.f1_score = F1Score(
             task=self.task, num_classes=self.num_classes, average=self.average
         ).to(self.device)
@@ -93,7 +93,7 @@ class MetricsCalculator:
         -------
         Returns
         -------
-        (acc_sc, f1_sc, pre_sc, rec_sc, conf_matrix_row_norm, conf_matrix_col_norm): 
+        (acc_sc, f1_sc, pre_sc, rec_sc, conf_matrix_row_norm, conf_matrix_col_norm):
             Tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]
             a tuple of base metrics like accuracy, f1, precision, recall
         """
