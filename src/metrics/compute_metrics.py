@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from torch import Tensor
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple, Union
 from sklearn.metrics import ConfusionMatrixDisplay
 from torchmetrics import Accuracy, F1Score, Precision, Recall, ConfusionMatrix
 
