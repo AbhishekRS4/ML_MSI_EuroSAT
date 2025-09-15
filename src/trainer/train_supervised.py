@@ -45,9 +45,8 @@ def train_model(
     criterion: CrossEntropyLoss,
     train_loader: DataLoader,
     device: torch.device,
-    scaler: GradScaler,
-    metrics_calculator: MetricsCalculator,
-) -> Tuple[float, float, float, float, float, np.ndarray, np.ndarray]:
+    amp_scaler: GradScaler,
+) -> Tuple[float]:
     """
     train loop
 
@@ -64,24 +63,18 @@ def train_model(
         an object of type torch dataloader
     device: torch.device
         a valid object of type torch device
-    scaler: GradScaler
+    amp_scaler: GradScaler
         a valid object of type GradScaler
-    metrics_calculator: MetricsCalculator
-        a valid object of type MetricsCalculator
 
     -------
     Returns
     -------
-    train_loss, train_acc, train_f1, train_prec, train_rec, train_conf_mat_row_norm, train_conf_mat_col_norm:
-    Tuple[float, float, float, float, float, np.ndarray, np.ndarray]
-        a tuple of training loss, accuracy, f1-score, precision, recall and confusion matrices
+    train_loss: float
+        training loss
     """
     model.to(device)
     model.train()
     num_train_batches = len(train_loader)
-    metrics_calculator.reset_metrics()
-
-    running_train_loss = torch.zeros(1).to(device)
 
     for msi_bands, true_labels in train_loader:
         msi_bands = msi_bands.to(device, dtype=torch.float)
@@ -89,42 +82,20 @@ def train_model(
 
         optimizer.zero_grad()
         # run forward pass with autocast
-        with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        with torch.autocast(device_type=device.type, dtype=torch.bfloat16):
             pred_logits = model(msi_bands)
             loss = criterion(pred_logits, true_labels)
-            pred_labels = torch.argmax(pred_logits, dim=1)
-            metrics_calculator.update_metrics(true_labels, pred_labels)
             running_train_loss += loss
 
         # loss is scaled and then scaled gradients are created
-        scaler.scale(loss).backward()
+        amp_scaler.scale(loss).backward()
         # apply the update
-        scaler.step(optimizer)
+        amp_scaler.step(optimizer)
         # update the scaler for the next iteration
-        scaler.update()
+        amp_scaler.update()
 
     train_loss = running_train_loss / num_train_batches
-
-    (
-        train_acc,
-        train_f1,
-        train_prec,
-        train_rec,
-        train_conf_mat_row_norm,
-        train_conf_mat_col_norm,
-    ) = metrics_calculator.compute_metrics()
-    train_conf_mat_row_norm = train_conf_mat_row_norm.clone().detach().cpu().numpy()
-    train_conf_mat_col_norm = train_conf_mat_col_norm.clone().detach().cpu().numpy()
-
-    return (
-        float(train_loss),
-        float(train_acc),
-        float(train_f1),
-        float(train_prec),
-        float(train_rec),
-        train_conf_mat_row_norm,
-        train_conf_mat_col_norm,
-    )
+    return float(train_loss)
 
 
 def test_model(
@@ -371,7 +342,7 @@ def train_pipeline(
     )
 
     criterion = CrossEntropyLoss()
-    scaler = GradScaler()
+    amp_scaler = GradScaler(device=device)
 
     logging.info(
         f"Training the EuroSAT MSI classification model started, model_name: {model_name}, num_classes: {num_classes}"
@@ -412,21 +383,13 @@ def train_pipeline(
 
         for epoch in range(1, num_epochs + 1):
             time_start = time.time()
-            (
-                train_loss,
-                train_acc,
-                train_f1,
-                train_precision,
-                train_recall,
-                train_conf_mat_row_norm,
-                train_conf_mat_col_norm,
-            ) = train_model(
+            train_loss = train_model(
                 model,
                 optimizer,
                 criterion,
                 train_loader,
                 device,
-                scaler,
+                amp_scaler,
                 metrics_calculator,
             )
             (
@@ -450,17 +413,13 @@ def train_pipeline(
                 f"Epoch: {epoch}/{num_epochs}, time: {time_end-time_start:.4f} sec."
             )
             logging.info(
-                f"Train set, loss: {train_loss:.4f}, accuracy: {train_acc:.4f}, f1: {train_f1:.4f}, precision: {train_precision:.4f}, recall: {train_recall:.4f}"
+                f"Train set, loss: {train_loss:.4f}"
             )
             logging.info(
                 f"Validation set, loss: {val_loss:.4f}, accuracy: {val_acc:.4f}, f1: {val_f1:.4f}, precision: {val_precision:.4f}, recall: {val_recall:.4f}\n"
             )
 
             mlflow.log_metric("train_loss", train_loss, step=epoch)
-            mlflow.log_metric("train_accuracy", train_acc, step=epoch)
-            mlflow.log_metric("train_f1", train_f1, step=epoch)
-            mlflow.log_metric("train_precision", train_precision, step=epoch)
-            mlflow.log_metric("train_recall", train_recall, step=epoch)
 
             mlflow.log_metric("val_loss", val_loss, step=epoch)
             mlflow.log_metric("val_accuracy", val_acc, step=epoch)
@@ -471,12 +430,7 @@ def train_pipeline(
             if val_acc >= best_val_acc:
                 best_val_acc = val_acc
                 # get the confusion matrix figures
-                train_conf_mat_row_norm_fig = get_confusion_matrix_figure(
-                    train_conf_mat_row_norm, list_class_names
-                )
-                train_conf_mat_col_norm_fig = get_confusion_matrix_figure(
-                    train_conf_mat_col_norm, list_class_names
-                )
+
                 val_conf_mat_row_norm_fig = get_confusion_matrix_figure(
                     val_conf_mat_row_norm, list_class_names
                 )
@@ -484,15 +438,6 @@ def train_pipeline(
                     val_conf_mat_col_norm, list_class_names
                 )
 
-                # log all the confusion matrix figures
-                mlflow.log_figure(
-                    train_conf_mat_row_norm_fig.figure_,
-                    f"train_conf_mat_row_norm_{epoch}.png",
-                )
-                mlflow.log_figure(
-                    train_conf_mat_col_norm_fig.figure_,
-                    f"train_conf_mat_col_norm_{epoch}.png",
-                )
                 mlflow.log_figure(
                     val_conf_mat_row_norm_fig.figure_,
                     f"val_conf_mat_row_norm_{epoch}.png",
@@ -503,8 +448,6 @@ def train_pipeline(
                 )
 
                 # close all the confusion matrix figures
-                plt.close(train_conf_mat_row_norm_fig.figure_)
-                plt.close(train_conf_mat_col_norm_fig.figure_)
                 plt.close(val_conf_mat_row_norm_fig.figure_)
                 plt.close(val_conf_mat_col_norm_fig.figure_)
 
