@@ -77,6 +77,8 @@ def train_model(
     model.train()
     num_train_batches = len(train_loader)
 
+    running_train_loss = torch.zeros(1).to(device)
+
     for msi_bands, true_labels in train_loader:
         msi_bands = msi_bands.to(device, dtype=torch.float)
         true_labels = true_labels.to(device, dtype=torch.long)
