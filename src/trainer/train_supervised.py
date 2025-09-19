@@ -19,6 +19,7 @@ from torch.optim.lr_scheduler import PolynomialLR
 from sklearn.metrics import ConfusionMatrixDisplay
 from mlflow.models.signature import infer_signature
 
+from loss_func.focal_loss import FocalLoss
 from data_handler.file_utils import get_list_files_n_labels
 from data_handler.supervised_data_loader import get_dataloaders_for_training
 from metrics.compute_metrics import MetricsCalculator, get_confusion_matrix_figure
@@ -185,6 +186,7 @@ def train_pipeline(
     model_name: str,
     list_filters: List[int] = [64, 128, 256],
     dropout_ratio: float = 0.2,
+    loss_fn: str = "focal",
     optimizer_name: str = "adamw",
     num_epochs: int = 100,
     learning_rate: float = 1e-3,
@@ -196,6 +198,7 @@ def train_pipeline(
     checkpoint_type: str = "torch_api",
     output_log_file: str = "trainer.log",
     model_compile: bool = True,
+    is_class_weights: bool = True,
 ) -> None:
     """
     main training pipeline for supervised training
@@ -203,7 +206,6 @@ def train_pipeline(
     ---------
     Arguments
     ---------
-
     dir_dataset: str
         full path to directory containing the dataset
     exp_name: str
@@ -230,12 +232,16 @@ def train_pipeline(
         number of workers to be used for data loading (default: 8)
     data_bands: List[str]
         a list of data bands that needs to be used for training the model (default: [B, G, R])
-    torch_api: str
+    loss_fn: str
+        a string indicating the loss function to be used to train the model (default: focal)
+    checkpoint_type: str
         indicating the type of the API used to save checkpoints (default: torch_api)
     output_log_file: str
         file name for the output log file (default: trainer.log)
     model_compile: bool
-        whether to use the option of compiling the model to reduce overhead during training the model
+        whether to use the option of compiling the model to reduce overhead during training the model (default: True)
+    is_class_weights: bool
+        whether to apply class weights or not (default: True)
     """
     if checkpoint_type == "torch_api":
         dir_ckpt_models = "tmp_models"
@@ -324,6 +330,7 @@ def train_pipeline(
         )
     else:
         logging.info(f"Unidentified option for arg (model_name): {model_name}")
+
     if model_compile:
         model = torch.compile(model, mode="reduce-overhead")
     model.to(device)
@@ -341,7 +348,24 @@ def train_pipeline(
         power=0.95,
     )
 
-    criterion = CrossEntropyLoss()
+    list_lbls = np.array(list_lbls)
+    unique_classes, count_classes = np.unique(list_lbls, return_counts=True)
+    total_samples = np.sum(count_classes)
+    class_weights = total_samples / (count_classes.shape[0] * count_classes)
+    class_weights = torch.tensor(class_weights, type=torch.float32)
+
+    if loss_fn == "cross_entropy":
+        if is_class_weights:
+            criterion = CrossEntropyLoss(weight=class_weights.to(device))
+        else:
+            criterion = CrossEntropyLoss()
+    elif loss_fn == "focal":
+        if is_class_weights:
+            criterion = FocalLoss(weight=class_weights.to(device))
+        else:
+            criterion = FocalLoss()
+    else:
+        logging.error(f"Wrong option for (loss_fn)={loss_fn}")
     amp_scaler = GradScaler(device=device)
 
     logging.info(
@@ -364,6 +388,8 @@ def train_pipeline(
         mlflow.log_param("optimization.learning_rate", learning_rate)
         mlflow.log_param("optimization.weight_decay", weight_decay)
         mlflow.log_param("optimization.batch_size", batch_size)
+        mlflow.log_param("optimization.loss_fn", loss_fn)
+        mlflow.log_param("optimization.class_weights", class_weights)
 
         mlflow.log_param("dataset.data_bands", data_bands)
         mlflow.log_param("dataset.num_classes", num_classes)
@@ -412,9 +438,7 @@ def train_pipeline(
             logging.info(
                 f"Epoch: {epoch}/{num_epochs}, time: {time_end-time_start:.4f} sec."
             )
-            logging.info(
-                f"Train set, loss: {train_loss:.4f}"
-            )
+            logging.info(f"Train set, loss: {train_loss:.4f}")
             logging.info(
                 f"Validation set, loss: {val_loss:.4f}, accuracy: {val_acc:.4f}, f1: {val_f1:.4f}, precision: {val_precision:.4f}, recall: {val_recall:.4f}\n"
             )
