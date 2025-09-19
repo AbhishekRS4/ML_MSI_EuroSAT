@@ -352,7 +352,7 @@ def train_pipeline(
     unique_classes, count_classes = np.unique(list_lbls, return_counts=True)
     total_samples = np.sum(count_classes)
     class_weights = total_samples / (count_classes.shape[0] * count_classes)
-    class_weights = torch.tensor(class_weights, type=torch.float32)
+    class_weights = torch.tensor(class_weights, dtype=torch.float32)
 
     if loss_fn == "cross_entropy":
         if is_class_weights:
