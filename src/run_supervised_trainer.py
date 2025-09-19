@@ -84,6 +84,13 @@ def parse_arguments() -> argparse.Namespace:
         help="dropout ratio to be used in the dropout layer in the model",
     )
     parser.add_argument(
+        "--loss-fn",
+        default="focal",
+        type=str,
+        choices=["cross_entropy", "focal"],
+        help="optimizer to be used for training",
+    )
+    parser.add_argument(
         "--optimizer-name",
         default="adamw",
         type=str,
@@ -116,6 +123,12 @@ def parse_arguments() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         help="whether to train the model using the compile option to reduce overhead",
     )
+    parser.add_argument(
+        "--is-class-weights",
+        default=True,
+        action=argparse.BooleanOptionalAction,
+        help="whether to apply class weights in the loss function or not",
+    )
 
     ARGS, unparsed = parser.parse_known_args()
     return ARGS
@@ -129,6 +142,7 @@ def main() -> None:
         ARGS.model_name,
         list_filters=ARGS.list_filters,
         dropout_ratio=ARGS.dropout_ratio,
+        loss_fn=ARGS.loss_fn,
         optimizer_name=ARGS.optimizer_name,
         num_epochs=ARGS.num_epochs,
         learning_rate=ARGS.learning_rate,
@@ -140,6 +154,7 @@ def main() -> None:
         checkpoint_type=ARGS.checkpoint_type,
         output_log_file=ARGS.output_log_file,
         model_compile=ARGS.model_compile,
+        is_class_weights=ARGS.is_class_weights,
     )
     return
 
