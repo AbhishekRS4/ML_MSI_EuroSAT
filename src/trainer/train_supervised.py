@@ -416,7 +416,6 @@ def train_pipeline(
                 train_loader,
                 device,
                 amp_scaler,
-                metrics_calculator,
             )
             (
                 val_loss,
