@@ -121,7 +121,7 @@ def test_model(
     ---------
     Arguments
     ---------
-    model: Union[MSI_ResNet, MSI_ResKANet,]
+    model: Union[MSI_ResNet, MSI_ResKANet, MSI_SE_ResNet, MSI_SE_ResKANet, MSI_PSA_ResNet, MSI_PSA_ResKANet]
         an object of type torch model
     criterion: CrossEntropyLoss
         an object of type torch criterion function
