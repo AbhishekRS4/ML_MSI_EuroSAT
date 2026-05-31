@@ -21,7 +21,7 @@ from mlflow.models.signature import infer_signature
 
 from loss_func.focal_loss import FocalLoss
 from data_handler.file_utils import get_list_files_n_labels
-from data_handler.supervised_data_loader import get_dataloaders_for_training
+from data_handler.torch_data_loader import get_dataloaders_for_training
 from metrics.compute_metrics import MetricsCalculator, get_confusion_matrix_figure
 from models.msi_supervised import (
     MSI_ResNet,
