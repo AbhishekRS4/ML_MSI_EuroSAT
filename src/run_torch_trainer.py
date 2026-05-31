@@ -1,6 +1,6 @@
 import argparse
 
-from trainer.train_supervised import train_pipeline
+from trainer.train_torch import train_pipeline
 
 
 def parse_arguments() -> argparse.Namespace:
