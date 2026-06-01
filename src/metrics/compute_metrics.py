@@ -15,6 +15,8 @@ class MetricsCalculator:
         task: str = "multiclass",
         num_classes: int = 10,
         average: str = "weighted",
+        dist_sync_on_step: bool = False,
+        sync_on_compute: bool = True,
     ):
         """
         MetricsCalculator class to compute some of the important metrics
@@ -30,33 +32,58 @@ class MetricsCalculator:
             an integer with the number of classes
         average: str
             a string indicating the type of averaging that needs to be performed for multi-class scenario (default: weighted)
+        dist_sync_on_step: bool
+            whether to synchronize metric states across processes at each step.
+            Set to True for distributed training to aggregate metrics across all
+            workers before computing. (default: False)
         """
         self.task = task
         self.device = device
         self.average = average
         self.num_classes = num_classes
+        self.dist_sync_on_step = dist_sync_on_step
+        self.sync_on_compute = sync_on_compute
 
-        self.accuracy_score = Accuracy(task=self.task, num_classes=self.num_classes).to(
-            self.device
-        )
+        self.accuracy_score = Accuracy(
+            task=self.task,
+            num_classes=self.num_classes,
+            dist_sync_on_step=self.dist_sync_on_step,
+            sync_on_compute=self.sync_on_compute,
+        ).to(self.device)
         self.f1_score = F1Score(
-            task=self.task, num_classes=self.num_classes, average=self.average
+            task=self.task,
+            num_classes=self.num_classes,
+            average=self.average,
+            dist_sync_on_step=self.dist_sync_on_step,
+            sync_on_compute=self.sync_on_compute,
         ).to(self.device)
         self.precision_score = Precision(
-            task=self.task, num_classes=self.num_classes, average=self.average
+            task=self.task,
+            num_classes=self.num_classes,
+            average=self.average,
+            dist_sync_on_step=self.dist_sync_on_step,
+            sync_on_compute=self.sync_on_compute,
         ).to(self.device)
         self.recall_score = Recall(
-            task=self.task, num_classes=self.num_classes, average=self.average
+            task=self.task,
+            num_classes=self.num_classes,
+            average=self.average,
+            dist_sync_on_step=self.dist_sync_on_step,
+            sync_on_compute=self.sync_on_compute,
         ).to(self.device)
         self.conf_matrix_row_norm = ConfusionMatrix(
             task=self.task,
             num_classes=self.num_classes,
             normalize="true",
+            dist_sync_on_step=self.dist_sync_on_step,
+            sync_on_compute=self.sync_on_compute,
         ).to(self.device)
         self.conf_matrix_col_norm = ConfusionMatrix(
             task=self.task,
             num_classes=self.num_classes,
             normalize="pred",
+            dist_sync_on_step=self.dist_sync_on_step,
+            sync_on_compute=self.sync_on_compute,
         ).to(self.device)
 
     def update_metrics(
