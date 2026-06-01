@@ -100,7 +100,12 @@ def parse_arguments() -> argparse.Namespace:
         "--data-bands",
         nargs="*",
         type=str,
-        default=["B", "G", "R", "NIR",],
+        default=[
+            "B",
+            "G",
+            "R",
+            "NIR",
+        ],
         choices=["B", "G", "R", "NIR", "SWIR-1", "SWIR-2"],
         help="the data bands that needs to used for training the model",
     )
