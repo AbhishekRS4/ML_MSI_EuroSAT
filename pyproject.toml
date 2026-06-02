@@ -1,0 +1,25 @@
+[project]
+name = "ml-msi-eurosat"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev-ray-torch = [
+    "huggingface-hub==0.30.2",
+    "ray[train]==2.44.1",
+]
+dev-torch = [
+    "matplotlib==3.10.5",
+    "mlflow==2.20.4",
+    "numpy==2.2.6",
+    "pykan==0.2.8",
+    "rasterio==1.4.3",
+    "scikit-learn==1.7.1",
+    "torch==2.6.0",
+    "torchmetrics==1.8.2",
+    "torchvision==0.21.0",
+    "tqdm==4.67.1",
+]
