@@ -169,7 +169,7 @@ def main() -> None:
 
     setup_logging(ARGS.output_log_file)
 
-    result = train_pipeline_ray(
+    train_pipeline_ray(
         model_name=ARGS.model_name,
         list_filters=ARGS.list_filters,
         dropout_ratio=ARGS.dropout_ratio,
@@ -188,9 +188,7 @@ def main() -> None:
         mlflow_tracking_uri=ARGS.mlflow_tracking_uri,
         run_name=ARGS.run_name,
     )
-
-    logging.info("Final Results:")
-    logging.info(f"  Last metrics:\n{result.metrics_dataframe.tail(1).to_string()}")
+    return
 
 
 if __name__ == "__main__":

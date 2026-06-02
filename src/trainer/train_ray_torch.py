@@ -468,7 +468,7 @@ def train_pipeline_ray(
     mlflow_tracking_uri: str = None,
     run_name: str = "eurosat_msi_ray_train",
     out_log_file: str = "ray_trainer.log",
-) -> ray.train.Result:
+) -> None:
     """
     Main training pipeline using Ray TorchTrainer with streaming
     HuggingFace parquet dataset.
@@ -608,4 +608,4 @@ def train_pipeline_ray(
     logging.info(f"Best checkpoint: {result.best_checkpoints}")
     logging.info(f"Last metrics:\n{result.metrics_dataframe.tail(1).to_string()}")
 
-    return result
+    return
