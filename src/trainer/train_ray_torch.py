@@ -23,7 +23,7 @@ from data_handler.hf_streaming_dataset import (
     EUROSAT_CLASS_NAMES,
     ray_preprocess,
     process_batch,
-    get_ray_datasets,
+    get_ray_datasets_4_training,
 )
 from metrics.compute_metrics import MetricsCalculator
 from models.msi_supervised import (
@@ -535,7 +535,7 @@ def train_pipeline_ray(
 
     # Create Ray Datasets from HuggingFace parquet files
     logging.info(f"Loading datasets from: {dataset_path}")
-    train_ds, val_ds = get_ray_datasets(dataset_path)
+    train_ds, val_ds = get_ray_datasets_4_training(dataset_path)
     train_ds = train_ds.repartition(num_blocks=16).map_batches(
         ray_preprocess,
         fn_args=(list_band_indices,),
