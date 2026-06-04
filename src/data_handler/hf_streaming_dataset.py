@@ -133,7 +133,7 @@ def process_batch(
     return images_tensor, labels_tensor
 
 
-def get_ray_datasets(
+def get_ray_datasets_4_training(
     dataset_path: str = DATASET_PATH,
 ) -> Tuple[ray.data.Dataset, ray.data.Dataset]:
     """
