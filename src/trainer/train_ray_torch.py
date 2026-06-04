@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import PolynomialLR
 
 from loss_func.focal_loss import FocalLoss
 from data_handler.data_bands import get_band_indices
-from data_handler.hf_streaming_dataset import (
+from data_handler.ray_hf_streaming_dataset import (
     DATASET_PATH,
     EUROSAT_CLASS_NAMES,
     ray_preprocess,
