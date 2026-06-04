@@ -102,7 +102,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model-compile",
-        default=False,
+        default=True,
         action=argparse.BooleanOptionalAction,
         help="whether to compile the model using torch.compile",
     )
@@ -126,7 +126,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-log-file",
-        default="ray_trainer.log",
+        default="ray_torch_trainer.log",
         type=str,
         help="full path to the log file where training logs are recorded",
     )
