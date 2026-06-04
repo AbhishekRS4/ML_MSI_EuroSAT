@@ -467,7 +467,7 @@ def train_pipeline_ray(
     exp_name: str = "eurosat_msi_ray_train",
     mlflow_tracking_uri: str = None,
     run_name: str = "eurosat_msi_ray_train",
-    out_log_file: str = "ray_trainer.log",
+    out_log_file: str = "ray_torch_trainer.log",
 ) -> None:
     """
     Main training pipeline using Ray TorchTrainer with streaming
