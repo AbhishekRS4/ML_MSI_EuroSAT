@@ -164,3 +164,36 @@ def get_ray_datasets_4_training(
     val_ds = ray.data.read_parquet(val_files, filesystem=hf_fs)
 
     return train_ds, val_ds
+
+
+def get_ray_datasets_4_testing(
+    dataset_path: str = DATASET_PATH,
+) -> Tuple[ray.data.Dataset, ray.data.Dataset]:
+    """
+    Create Ray Datasets for validation and test splits from HuggingFace parquet files.
+
+    ---------
+    Arguments
+    ---------
+    dataset_path: str
+        the HuggingFace dataset path (hf:// protocol)
+
+    -------
+    Returns
+    -------
+    (val_ds, test_ds): Tuple[ray.data.Dataset, ray.data.Dataset]
+        Ray datasets for validation and testing
+    """
+    hf_fs = HfFileSystem()
+
+    # List all parquet files
+    all_files = [f["name"] for f in hf_fs.ls(dataset_path)]
+
+    val_files = [f for f in all_files if "validation" in f and f.endswith(".parquet")]
+    test_files = [f for f in all_files if "test" in f and f.endswith(".parquet")]
+
+    # Read parquet files as Ray Datasets using HfFileSystem
+    val_ds = ray.data.read_parquet(val_files, filesystem=hf_fs)
+    test_ds = ray.data.read_parquet(test_files, filesystem=hf_fs)
+
+    return val_ds, test_ds
