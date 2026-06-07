@@ -438,6 +438,7 @@ def train_loop_per_worker(config: Dict):
                 mlflow.log_artifact(
                     local_path=str(file_model_name), artifact_path="model_artifacts"
                 )
+                file_model_name.unlink()
 
         # ray.train.report must be called by all workers (collective operation)
         ray.train.report(metrics=metrics)
