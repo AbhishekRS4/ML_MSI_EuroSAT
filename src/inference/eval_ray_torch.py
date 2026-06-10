@@ -85,9 +85,7 @@ def load_model_from_checkpoint(
     state_dict = checkpoint["model_state_dict"]
     compiled_prefix = "_orig_mod."
     if any(k.startswith(compiled_prefix) for k in state_dict.keys()):
-        state_dict = {
-            k.removeprefix(compiled_prefix): v for k, v in state_dict.items()
-        }
+        state_dict = {k.removeprefix(compiled_prefix): v for k, v in state_dict.items()}
 
     model.load_state_dict(state_dict)
     model.to(device)
