@@ -187,7 +187,7 @@ def main() -> None:
         exp_name=ARGS.exp_name,
         mlflow_tracking_uri=ARGS.mlflow_tracking_uri,
         run_name=ARGS.run_name,
-        out_log_file=ARGS.output_log_file
+        out_log_file=ARGS.output_log_file,
     )
     return
 
