@@ -30,9 +30,11 @@ from models.msi_supervised import (
 def load_model_from_checkpoint(
     checkpoint_path: str,
     device: torch.device,
+    model_compile: bool = False,
 ) -> torch.nn.Module:
     """
-    Load a trained model from a checkpoint file.
+    Load a trained model from a checkpoint file. Handles state dicts saved
+    from both compiled (torch.compile) and non-compiled models.
 
     ---------
     Arguments
@@ -41,6 +43,8 @@ def load_model_from_checkpoint(
         full path to the model checkpoint (.pt or .pth file)
     device: torch.device
         torch device to load the model onto
+    model_compile: bool
+        whether to compile the loaded model with torch.compile (default: False)
 
     -------
     Returns
@@ -75,8 +79,22 @@ def load_model_from_checkpoint(
         list_filters=list_filters,
         dropout_ratio=dropout_ratio,
     )
-    model.load_state_dict(checkpoint["model_state_dict"])
+
+    # Handle state dicts saved from compiled models.
+    # torch.compile wraps the model and prefixes keys with "_orig_mod."
+    state_dict = checkpoint["model_state_dict"]
+    compiled_prefix = "_orig_mod."
+    if any(k.startswith(compiled_prefix) for k in state_dict.keys()):
+        state_dict = {
+            k.removeprefix(compiled_prefix): v for k, v in state_dict.items()
+        }
+
+    model.load_state_dict(state_dict)
     model.to(device)
+
+    if model_compile:
+        model = torch.compile(model, mode="reduce-overhead")
+
     model.eval()
     return model
 
@@ -124,6 +142,8 @@ def evaluate_model(
     # Load model from checkpoint
     logging.info(f"Loading model from checkpoint: {checkpoint_path}")
     model = load_model_from_checkpoint(checkpoint_path, device)
+
+    logging.info(f"Data bands: {data_bands}")
 
     list_band_indices = get_band_indices(data_bands)
     num_classes = len(EUROSAT_CLASS_NAMES)
