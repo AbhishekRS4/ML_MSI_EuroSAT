@@ -606,7 +606,5 @@ def train_pipeline_ray(
     result = trainer.fit()
 
     logging.info("Training complete!")
-    logging.info(f"Best checkpoint: {result.best_checkpoints}")
-    logging.info(f"Last metrics:\n{result.metrics_dataframe.tail(1).to_string()}")
 
     return
