@@ -24,4 +24,4 @@
 
 
 ## Remarks
-* The goal is not to get the best performance but upskill to learn Ray distributed training for a tiny streaming dataset
+* The goal is not to get the best performance but upskill to learn Ray Torch distributed training for a tiny streaming dataset and also experiment with KAN and compare the performance with normal dense layer
