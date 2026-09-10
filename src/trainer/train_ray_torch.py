@@ -35,7 +35,6 @@ from models.msi_supervised import (
     MSI_PSA_ResKANet,
 )
 
-
 os.environ["NCCL_SOCKET_IFNAME"] = "lo"
 os.environ["NCCL_P2P_DISABLE"] = "1"
 

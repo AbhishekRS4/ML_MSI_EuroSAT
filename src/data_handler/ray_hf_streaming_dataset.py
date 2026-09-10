@@ -6,7 +6,6 @@ import ray
 from typing import Dict, List, Tuple
 from huggingface_hub import HfFileSystem
 
-
 DATASET_PATH = "hf://datasets/blanchon/EuroSAT_MSI/data"
 
 
