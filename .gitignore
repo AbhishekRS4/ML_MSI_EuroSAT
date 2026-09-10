@@ -213,3 +213,4 @@ __marimo__/
 # local mlflow artifacts
 mlruns
 tmp_models/
+model_for_prod/
