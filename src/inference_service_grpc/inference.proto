@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package image_classifier;
+
+service MSImageClassifier {
+  // Accepts a batch of images and returns a batch of classifications
+  rpc PredictBatch (BatchInferenceRequest) returns (BatchInferenceResponse);
+}
+
+message MSImageSample {
+  bytes image_bytes = 1;  // Raw .tif file bytes
+  string sample_id = 2;   // Optional identifier for auditing
+}
+
+message BatchInferenceRequest {
+  repeated MSImageSample samples = 1;
+}
+
+message PredictionResult {
+  string sample_id = 1;
+  int32 class_id = 2;
+  float confidence = 3;
+}
+
+message BatchInferenceResponse {
+  repeated PredictionResult predictions = 1;
+}
