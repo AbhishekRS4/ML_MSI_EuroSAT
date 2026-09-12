@@ -25,7 +25,7 @@ dev-torch = [
     "mlflow==3.15.2",
     "numpy==2.5.2",
     "pykan==0.2.8",
-    "rasterio==1.4.3",
+    "rasterio==1.5.1",
     "scikit-learn==1.9.0",
     "torch==2.14.0",
     "torchmetrics==1.9.0",
