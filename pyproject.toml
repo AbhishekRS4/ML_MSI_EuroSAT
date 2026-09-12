@@ -7,6 +7,15 @@ requires-python = ">=3.10"
 dependencies = []
 
 [dependency-groups]
+dev-grpc-serve = [
+    "grpcio==1.83.1",
+    "grpcio-tools==1.83.1",
+    "numpy==2.5.2",
+    "pykan==0.2.8",
+    "tifffile==2026.9.9",
+    "torch==2.14.0",
+    "torchvision==0.29.0",
+]
 dev-ray-torch = [
     "huggingface-hub==0.30.2",
     "ray[train]==2.44.1",
