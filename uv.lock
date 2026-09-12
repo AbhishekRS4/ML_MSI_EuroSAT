@@ -1065,12 +1065,14 @@ source = { virtual = "." }
 dev-grpc-serve = [
     { name = "grpcio" },
     { name = "grpcio-tools" },
+    { name = "matplotlib" },
     { name = "numpy" },
     { name = "pykan" },
     { name = "scikit-learn" },
     { name = "tifffile" },
     { name = "torch" },
     { name = "torchvision" },
+    { name = "tqdm" },
 ]
 dev-ray-torch = [
     { name = "huggingface-hub" },
@@ -1095,12 +1097,14 @@ dev-torch = [
 dev-grpc-serve = [
     { name = "grpcio", specifier = "==1.83.1" },
     { name = "grpcio-tools", specifier = "==1.83.1" },
+    { name = "matplotlib", specifier = "==3.11.1" },
     { name = "numpy", specifier = "==2.5.2" },
     { name = "pykan", specifier = "==0.2.8" },
     { name = "scikit-learn", specifier = "==1.9.0" },
     { name = "tifffile", specifier = "==2026.9.9" },
     { name = "torch", specifier = "==2.14.0" },
     { name = "torchvision", specifier = "==0.29.0" },
+    { name = "tqdm", specifier = "==4.70.0" },
 ]
 dev-ray-torch = [
     { name = "huggingface-hub", specifier = "==1.30.0" },
