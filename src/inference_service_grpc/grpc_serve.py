@@ -150,7 +150,7 @@ def main() -> None:
         type=str,
         nargs="*",
         default=["B", "G", "R", "NIR"],
-        help="Number of thread workers for the gRPC pool",
+        help="List of data bands to be used",
     )
     ARGS, _ = parser.parse_known_args()
 
