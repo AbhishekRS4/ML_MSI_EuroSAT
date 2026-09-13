@@ -109,7 +109,7 @@ def serve(ARGS: argparse.Namespace) -> None:
     )
     server_address = f"[::]:{ARGS.port}"
     server.add_insecure_port(server_address)
-    logging.info(f"gRPC PyTorch server running on port {ARGS.port}...")
+    logging.info(f"gRPC EuroSAT server running on port {ARGS.port}...")
     server.start()
     server.wait_for_termination()
     return
