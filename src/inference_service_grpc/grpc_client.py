@@ -89,7 +89,7 @@ def main() -> None:
     # Mocking execution using dummy paths
     # Replace these paths with actual local .tif file paths for testing
     parser = argparse.ArgumentParser(
-        description="Start the gRPC ML Inference Server.",
+        description="Start the gRPC ML Inference Client.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
