@@ -23,6 +23,7 @@ dev-grpc-serve = [
 ]
 dev-ray-torch = [
     "huggingface-hub==1.30.0",
+    "pyarrow==25.0.1",
     "ray[train]==2.58.0",
 ]
 dev-torch = [
