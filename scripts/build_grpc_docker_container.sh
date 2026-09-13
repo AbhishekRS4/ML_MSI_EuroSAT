@@ -90,9 +90,7 @@ else
 fi
 
 # --------------------------------------------------------------------------
-# Resolve repo root (the directory that contains this script's parent dir).
-# The script lives at <repo_root>/kserve_scripts/build_docker_image.sh,
-# so REPO_ROOT is two levels up from the script itself.
+# Resolve repo root from the location of this script.
 # --------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -122,15 +120,9 @@ if [[ ! -f "${REPO_ROOT}/${DOCKERFILE}" ]]; then
     exit 1
 fi
 
-# Verify pyproject.toml and uv.lock exist (copied into the image by the Dockerfile).
-if [[ ! -f "${REPO_ROOT}/pyproject.toml" ]]; then
-    echo "[ERROR] pyproject.toml not found in repo root." >&2
-    exit 1
-fi
-
-if [[ ! -f "${REPO_ROOT}/uv.lock" ]]; then
-    echo "[ERROR] uv.lock not found in repo root." >&2
-    echo "        Run 'uv lock' from the repo root to generate it." >&2
+# Verify requirements file exists (copied into the image by the Dockerfile).
+if [[ ! -f "${REPO_ROOT}/requirements-grpc-serve.txt" ]]; then
+    echo "[ERROR] requirements-grpc-serve.txt not found in repo root." >&2
     exit 1
 fi
 
