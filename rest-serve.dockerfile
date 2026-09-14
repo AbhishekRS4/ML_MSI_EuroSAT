@@ -51,5 +51,5 @@ ENTRYPOINT ["python", "rest_serve.py"]
 CMD ["--model-path", "/app/model_ckpt/model.pt", \
      "--host",       "0.0.0.0", \
      "--port",       "8000", \
-     "--workers",    "1", \
+     "--workers",    "4", \
      "--data-bands", "B", "G", "R", "NIR"]
