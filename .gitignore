@@ -214,3 +214,4 @@ __marimo__/
 mlruns
 tmp_models/
 model_for_prod/
+model_for_triton/
