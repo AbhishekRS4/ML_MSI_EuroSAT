@@ -70,7 +70,7 @@ bash scripts/run_triton_docker_service.sh --model-repo src/inference_service_tri
 |      Triton (HTTP)  |             |      16     |                   ~ 70 - 75                        |
 |      Triton (gRPC)  |             |      16     |                   ~ 70 - 75                        |
 
-* From the results, it is pretty clear that the latency and the total inference time is slightly faster with gRPC when compared with that of FastAPI. The test has been performed locally with a single client. This would certainly differ in case of high request volume with many concurrent clients. Also, gRPC would be best suited for real-time streaming inference applications.
+* From the results, it is pretty clear that the latency and the total inference time is slightly faster with gRPC when compared with that of FastAPI. The test has been performed locally with a single client. This would certainly differ in case of high request volume with many concurrent clients. Also, gRPC would be best suited for real-time streaming inference applications. Triton server is slightly slower given that there is some additional data processing overhead. The latency times can improve further with model quantization. However, this is not the main focus of this repo.
 
 
 ## Dependency management
