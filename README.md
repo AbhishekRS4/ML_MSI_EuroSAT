@@ -1,4 +1,4 @@
-# A repo with Ray Torch distributed ML experiments on EuroSAT multi-spectral imagery dataset
+# A repo with Ray Torch distributed ML training and different inference serving methodology experiments on EuroSAT multi-spectral imagery dataset
 
 
 ## Experiments
