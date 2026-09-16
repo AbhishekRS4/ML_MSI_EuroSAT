@@ -5,7 +5,7 @@
 * The goal of the project is to learn and expand new skills -
     * Classification experiments for studying the effects of using Kolmogorov-Arnold Networks (KAN) on the LULC classification model performance
     * To train models using Ray Torch distributed training on streaming data from huggingface hub without downloading the data to the disk.
-    * To experiment and compare the latency in using REST API with gRPC for inference serving
+    * To experiment and compare the latency in using REST API with gRPC for inference serving, along with Triton inference server
 
 
 ## Instruction to run the code
