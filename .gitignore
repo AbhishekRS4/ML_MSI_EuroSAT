@@ -215,3 +215,7 @@ mlruns
 tmp_models/
 model_for_prod/
 model_for_triton/
+
+# Triton model repository version directories (e.g. model_reskanet/1/)
+**/[0-9]*/
+**/[0-9][0-9]*/
