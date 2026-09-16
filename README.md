@@ -42,7 +42,7 @@
 
 
 ## To build and deploy Triton inference service
-* The following script can be used for converting the model checkpoint from normal PyTorch pickle to TorchScript graph [src/inference_service_triton/convert_pickle_2_torchscript.py](src/inference_service_triton/convert_pickle_2_torchscript.py)
+* The following script can be used for converting the model checkpoint from normal PyTorch pickle to TorchScript model file [src/inference_service_triton/convert_pickle_2_torchscript.py](src/inference_service_triton/convert_pickle_2_torchscript.py)
 * The converted TorchScript model file needs to be in the following directory structure
 ```
 /path/to/model/repository/
