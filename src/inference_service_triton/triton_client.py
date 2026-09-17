@@ -4,6 +4,8 @@ import argparse
 import numpy as np
 import torch
 import tifffile as tiff
+import tritonclient.http as httpclient
+import tritonclient.grpc as grpcclient
 
 
 from itertools import batched
@@ -39,9 +41,9 @@ def get_triton_client(client_type: str, url: str):
     (client, InferInput, InferRequestedOutput): tuple
     """
     if client_type == "http":
-        import tritonclient.http as triton
+        triton = httpclient
     elif client_type == "grpc":
-        import tritonclient.grpc as triton
+        triton = grpcclient
     else:
         raise ValueError(
             f"Unsupported client type '{client_type}'. Choose 'http' or 'grpc'."
