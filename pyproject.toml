@@ -53,3 +53,10 @@ dev-torch = [
     "torchvision==0.29.0",
     "tqdm==4.70.0",
 ]
+dev-triton-serve = [
+    "numpy==2.5.2",
+    "tifffile==2026.9.9",
+    "torch==2.14.0",
+    "triton==3.8.0",
+    "tritonclient==2.72.0",
+]
